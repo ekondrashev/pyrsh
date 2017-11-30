@@ -2,44 +2,35 @@
 # -*- coding: utf-8 -*-
 import paramiko
 import argparse
-
-def Main():
-
-	# Описание скрипта
-	parser = argparse.ArgumentParser(description='Remote command execution via ssh')
-	#  Задаем названия и описания аргументов
-	parser.add_argument('host', help='Hostname', type=str)
-	parser.add_argument('user', help='Your user', type=str)
-	parser.add_argument('password', help='Your password', type=str)
-	parser.add_argument('command', help='Your command', type=str)
-	args = parser.parse_args()
-
+	
+def main(args):
 	host = args.host
 	user = args.user
 	psw = args.password
-	port = 22
+	port = args.port
 
 	try:
 		ssh = paramiko.SSHClient()
 
-		# если при соединении с сервером ключа не найдено, то по умолчанию ключ «отбивается» и вызввается SSHException.
+		# If you can not find the key when connecting to the server, then by default the key is "discouraged" and called SSHException.
 		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 		
 		ssh.connect(hostname=host, port=port, username=user, password=psw)
 
-		# Выполнение команды
+		# implementation commands
 		stdin, stdout, stderr = ssh.exec_command(args.command)
 
-		# Выводим результат
+		# Output the result
 		result = stdout.read() + stderr.read()
 		print(result)
 
-		# или так если нужно вывести list
+		# For output the list
 		# result = stdout.read().splitlines()
 		# print(result)
 
-		# Закрываем соединение
+		# close connection
 		ssh.close()
+		pass
 	except:
 		print('Connection failed')
 		pass
@@ -47,4 +38,14 @@ def Main():
 
 
 if __name__ == "__main__":
-	Main()
+	# Create description scrit
+	parser = argparse.ArgumentParser(description='Remote command execution via ssh')
+	#  specify the name and description argyments
+	parser.add_argument('host', help='Hostname', type=str)
+	parser.add_argument('user', help='Your user', type=str)
+	parser.add_argument('password', help='Your password', type=str)
+	parser.add_argument('command', help='Your command', type=str)
+	parser.add_argument('port', nargs='?', default=22, help='Enter your port, default port=22', type=int)
+	args = parser.parse_args()
+	
+	main(args)
