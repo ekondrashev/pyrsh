@@ -8,7 +8,7 @@ import shutil
 
 import MockSSH
 import paramiko
-from cisco import commands
+from server import commands
 
 
 def recv_all(channel):
