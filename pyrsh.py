@@ -4,7 +4,7 @@ import paramiko
 import argparse
 import sys
 from contextlib import contextmanager
-
+import time
 
 def arguments():
 	parser = argparse.ArgumentParser(description='Remote command execution via ssh')
@@ -31,17 +31,20 @@ def ssh(args):
 	finally:
 		connect.close()
 
-def main():
-	args = arguments()
+def main(args):
 	try:
 		with ssh(args) as connect:
-			stdin, stdout, stderr = connect.exec_command(args.command)
-			result = stdout.read() + stderr.read()
-			print(result)
+			channel = connect.invoke_shell()
+			channel.send(args.command+'\n')
+			time.sleep(2)
+			output = channel.recv(10000)
+			return output
 	except:
 		sys.stderr.write("Encountered an error\n")
 		sys.exit(-1)
 
 	
 if __name__ == "__main__":
-	main()
+	args = arguments()
+	result = main(args)
+	print(result)
