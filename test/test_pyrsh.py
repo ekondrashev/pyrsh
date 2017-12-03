@@ -21,47 +21,67 @@ def recv_all(channel):
     return stdout
 
 
-class MockCiscoTestCase(unittest.TestCase):
+class PyrshTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-
-
-        try:
-            #
-            # command: pwd
-            #
-            def pwd_command_success(instance):
-                instance.writeln("[OK]")
-            def pwd_command_failure(instance):
-                instance.writeln("MockSSH: Supported usage: pwd")
-            command_pwd = MockSSH.ArgumentValidatingCommand('pwd', [pwd_command_success],
-                                                           [pwd_command_failure], *[])
-            commands = [ command_pwd ]
-            users = {'testadmin': 'x'}
-            cls.keypath = tempfile.mkdtemp()
-            MockSSH.startThreadedServer(
-                commands,
-                prompt="hostname>",
-                keypath=cls.keypath,
-                interface="localhost",
-                port=9999,
-                **users)
-        except KeyboardInterrupt:
-            print "User interrupted"
-            sys.exit(1)
-
+        #
+        # command: pwd
+        #
+        def pwd_command_success(instance):
+            instance.writeln("[OK]")
+        def pwd_command_failure(instance):
+            instance.writeln("MockSSH: Supported usage: pwd")
+        command_pwd = MockSSH.ArgumentValidatingCommand('pwd', [pwd_command_success],
+                                                       [pwd_command_failure], *[])
+        #
+        # command: ls
+        #
+        def ls_command_success(instance):
+            instance.writeln("[OK]")
+        def ls_command_failure(instance):
+            instance.writeln("MockSSH: Supported usage: ls l")
+        command_ls = MockSSH.ArgumentValidatingCommand('ls', [ls_command_success],
+                                               [ls_command_failure], *["l"])
+        #
+        # command: date
+        #
+        def date_command_success(instance):
+            instance.writeln("[OK]")
+        def date_command_failure(instance):
+            instance.writeln("MockSSH: Supported usage: date")
+        command_date = MockSSH.ArgumentValidatingCommand('date', [date_command_success],
+                                               [date_command_failure], *[])
+        commands = [ command_pwd, command_ls, command_date ]
+        users = {'testadmin': 'x'}
+        cls.keypath = tempfile.mkdtemp()
+        MockSSH.startThreadedServer(
+            commands,
+            prompt="hostname>",
+            keypath=cls.keypath,
+            interface="localhost",
+            port=9999,
+            **users)
 
     @classmethod
     def tearDownClass(cls):
-        print "tearDownClass"
         MockSSH.stopThreadedServer()
         shutil.rmtree(cls.keypath)
 
-    def test_password_reset_success(self):
+    def test_command_pwd(self):
         args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='pwd', port=9999)
         result = main(args)
         self.assertEqual(result, ('hostname>pwd\r\n[OK]\r\nhostname>'))
+
+    def test_command_ls(self):
+        args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='ls l', port=9999)
+        result = main(args)
+        self.assertEqual(result, ('hostname>ls l\r\n[OK]\r\nhostname>'))
+
+    def test_command_date(self):
+        args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='date', port=9999)
+        result = main(args)
+        self.assertEqual(result, ('hostname>date\r\n[OK]\r\nhostname>'))
 
 
 if __name__ == "__main__":
