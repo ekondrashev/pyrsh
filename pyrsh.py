@@ -32,19 +32,18 @@ def ssh(args):
 		connect.close()
 
 def main(args):
+	with ssh(args) as connect:
+		channel = connect.invoke_shell()
+		channel.send(args.command+'\n')
+		time.sleep(2)
+		output = channel.recv(10000)
+		return output
+	
+if __name__ == "__main__":
 	try:
-		with ssh(args) as connect:
-			channel = connect.invoke_shell()
-			channel.send(args.command+'\n')
-			time.sleep(2)
-			output = channel.recv(10000)
-			return output
+		args = arguments()
+		result = main(args)
+		print(result)
 	except:
 		sys.stderr.write("Encountered an error\n")
 		sys.exit(-1)
-
-	
-if __name__ == "__main__":
-	args = arguments()
-	result = main(args)
-	print(result)
