@@ -9,17 +9,11 @@ import sys
 import MockSSH
 import paramiko
 from pyrsh import main
-
 from argparse import Namespace
 
-def recv_all(channel):
-    while not channel.recv_ready():
-        time.sleep(0.1)
-    stdout = ''
-    while channel.recv_ready():
-        stdout += channel.recv(1024)
-    return stdout
-
+def args( cmd, host='127.0.0.1', user='testadmin', password='x', port=9999 ):
+    arg = Namespace(host=host, user=user, password=password, cmd=cmd, port=port)
+    return arg
 
 class PyrshTest(unittest.TestCase):
 
@@ -69,20 +63,16 @@ class PyrshTest(unittest.TestCase):
         shutil.rmtree(cls.keypath)
 
     def test_command_pwd(self):
-        args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='pwd', port=9999)
-        result = main(args)
-        self.assertEqual(result, ('hostname>pwd\r\n[OK]\r\nhostname>'))
+        result = main(args('pawdwd'))
+        self.assertEqual(result, ('hostname>'))
 
     def test_command_ls(self):
-        args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='ls l', port=9999)
-        result = main(args)
-        self.assertEqual(result, ('hostname>ls l\r\n[OK]\r\nhostname>'))
+        result = main(args('ls l'))
+        self.assertEqual(result, ('hostname>'))
 
     def test_command_date(self):
-        args = Namespace(host='127.0.0.1', user='testadmin', password='x', command='date', port=9999)
-        result = main(args)
-        self.assertEqual(result, ('hostname>date\r\n[OK]\r\nhostname>'))
-
+        result = main(args('date'))
+        self.assertEqual(result, ('hostname>'))
 
 if __name__ == "__main__":
     unittest.main()
