@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import paramiko
+import argparse
+import sys
+from contextlib import contextmanager
+import time
+
+import subprocess
+import telnetlib
+import os
+
+class ssh:
+    def __init__(self):
+        parser = argparse.ArgumentParser(description='Remote command execution via ssh')
+        parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; def_li - run a command for Linux without using third-party libraries; def_win - run a command for Linux without using third-party libraries; custom - run a command with using paramiko', type=str)
+        parser.add_argument('cmd', help='Command bash', type=str)
+        parser.add_argument('user', help='User name to use for authentication', type=str)
+        parser.add_argument('password', help='Password to use for authentication', type=str)
+        parser.add_argument('host', nargs='?', default="127.0.0.1", help='Hostname to use for authentication', type=str)
+        parser.add_argument('port', nargs='?', default=22, help='Port/ID, default port=22', type=int)
+        result = parser.parse_args()
+        self.type = result.type
+        self.host = result.host
+        self.user = result.user
+        self.password = result.password
+        self.cmd = result.cmd
+        self.port = result.port
+
+    @contextmanager
+    def sshcon(self):
+        connect = paramiko.SSHClient()
+        connect.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        connect.connect(hostname=self.host, port=self.port, username=self.user, password=self.password)
+        yield connect
+        connect.close()
+
+    def local(self):
+        retcode = subprocess.Popen(self.cmd,
+                                    shell=True)
+        return retcode
+
+    def default_linux(self):
+        per = str(self.user+'@'+self.host)
+        ssh = subprocess.Popen(['ssh', per, self.cmd],
+                               shell=False,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+        result = ssh.stdout.readlines()
+        if result == []:
+            error = ssh.stderr.readlines()
+            return error
+        else:
+            return result
+
+    def default_windows(self):
+        tn = telnetlib.Telnet(self.host)
+        tn.read_until("login: ")
+        tn.write(self.user + "\r")
+        tn.read_until("password: ")
+        tn.write(self.password + "\r")
+        time.sleep(1)
+        tn.write(self.cmd + "\r")
+        return tn.read_all()
+
+    def custom(self):
+        with self.sshcon() as connect:
+            channel = connect.invoke_shell()
+            self.response(channel)
+            channel.send(self.cmd+'\n')
+            stdout = self.response(channel)
+            dsgsf = stdout
+            return stdout
+
+    def response(self, channel):
+        while not channel.recv_ready():
+            time.sleep(0.1)
+        stdout = ''
+        while channel.recv_ready():
+            stdout += channel.recv(1024)
+        return stdout
+
+
+if __name__ == "__main__":
+    try:
+        clssh = ssh()
+        if(clssh.type == "local"):
+            result = clssh.local()
+            print(result)
+        elif(clssh.type == "def_li"):
+                result = clssh.default_linux()
+                print(result)
+        elif(clssh.type == "def_win"):
+                result = clssh.default_windows()
+                print(result)
+        elif(clssh.type == "custom"):
+            result = clssh.custom()
+            print(result)
+    except paramiko.ssh_exception.AuthenticationException as e:
+        sys.stderr.write(e + "\n")
+        sys.exit(-1)
+    except:
+        sys.stderr.write("Encountered an error\n")
+        sys.exit(-1)
