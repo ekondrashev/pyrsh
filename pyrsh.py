@@ -1,53 +1,41 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import paramiko
 import argparse
 import sys
-from contextlib import contextmanager
-import time
 
-def arguments():
+from typecon.conparamiko import conparamiko
+from typecon.conlinux import conlinux
+from typecon.conwindows import conwindows
+from typecon.runlocal import runlocal
+   
+def args():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
-    parser.add_argument('host', help='Hostname', type=str)
-    parser.add_argument('user', help='Your user', type=str)
-    parser.add_argument('password', help='Your password', type=str)
-    parser.add_argument('cmd', help='Your cmd', type=str)
-    parser.add_argument('port', nargs='?', default=22, help='Enter your port, default port=22', type=int)
-    result = parser.parse_args()
-    return result
-    
-def response(channel):
-    while not channel.recv_ready():
-        time.sleep(0.1)
-    stdout = ''
-    while channel.recv_ready():
-        stdout += channel.recv(1024)
-    return stdout
+    parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; def_li - run a command for Linux without using third-party libraries; def_win - run a command for Linux without using third-party libraries; custom - run a command with using paramiko', type=str)
+    parser.add_argument('cmd', help='Command bash', type=str)
+    parser.add_argument('user', help='User name to use for authentication', type=str)
+    parser.add_argument('password', help='Password to use for authentication', type=str)
+    parser.add_argument('host', nargs='?', default="127.0.0.1", help='Hostname to use for authentication', type=str)
+    parser.add_argument('port', nargs='?', default=22, help='Port/ID, default port=22', type=int)
+    return parser.parse_args()
 
-@contextmanager
-def ssh(args):
-    connect = paramiko.SSHClient()
-    connect.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    connect.connect(hostname=args.host, port=args.port, username=args.user, password=args.password)
-    yield connect
-    connect.close()
-
-def main(args):
-    with ssh(args) as connect:
-        channel = connect.invoke_shell()
-        channel.send(args.cmd+'\n')
-        stdout = response(channel)
-        dsgsf = stdout
-        return stdout
-    
-if __name__ == "__main__":
+def main():
     try:
-        args = arguments()
-        result = main(args)
-        print(result)
-    except paramiko.ssh_exception.AuthenticationException as e:
-        sys.stderr.write(e + "\n")
-        sys.exit(-1)
+        nameargs = args()
+        if(nameargs.type == "local"):
+            runloc = runlocal(nameargs)
+            print(runloc.run())
+        elif(nameargs.type == "def_li"):
+            conlin = conlinux(nameargs)
+            print(conlin.run())
+        elif(nameargs.type == "def_win"):
+            conwin = conwindows(nameargs)
+            print(conwin.run())
+        elif(nameargs.type == "custom"):
+            conpara = conparamiko(nameargs)
+            print(conpara.run())
     except:
         sys.stderr.write("Encountered an error\n")
         sys.exit(-1)
+
+if __name__ == "__main__":
+    main()
