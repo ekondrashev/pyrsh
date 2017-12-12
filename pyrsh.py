@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from app.paramiko import paramiko
+from app.clparamiko import clparamiko
 from app.defaultssh import defaultssh
 from app.telnet import telnet
 from app.local import local
@@ -31,7 +31,7 @@ def main():
             conwin = telnet(args)
             print(conwin.run())
         elif(args.type == "custom"):
-            conpara = paramiko(args)
+            conpara = clparamiko(args)
             print(conpara.run())
     except:
         sys.stderr.write("Encountered an error\n")
