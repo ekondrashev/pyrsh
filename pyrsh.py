@@ -3,12 +3,12 @@
 import argparse
 import sys
 
-from typecon.conparamiko import conparamiko
-from typecon.conlinux import conlinux
-from typecon.conwindows import conwindows
-from typecon.runlocal import runlocal
+from app.paramiko import paramiko
+from app.defaultssh import defaultssh
+from app.telnet import telnet
+from app.local import local
    
-def args():
+def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
     parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; def_li - run a command for Linux without using third-party libraries; def_win - run a command for Linux without using third-party libraries; custom - run a command with using paramiko', type=str)
     parser.add_argument('cmd', help='Command bash', type=str)
@@ -20,18 +20,18 @@ def args():
 
 def main():
     try:
-        nameargs = args()
-        if(nameargs.type == "local"):
-            runloc = runlocal(nameargs)
+        args = arguments()
+        if(args.type == "local"):
+            runloc = local(args)
             print(runloc.run())
-        elif(nameargs.type == "def_li"):
-            conlin = conlinux(nameargs)
+        elif(args.type == "def_li"):
+            conlin = defaultssh(args)
             print(conlin.run())
-        elif(nameargs.type == "def_win"):
-            conwin = conwindows(nameargs)
+        elif(args.type == "def_win"):
+            conwin = telnet(args)
             print(conwin.run())
-        elif(nameargs.type == "custom"):
-            conpara = conparamiko(nameargs)
+        elif(args.type == "custom"):
+            conpara = paramiko(args)
             print(conpara.run())
     except:
         sys.stderr.write("Encountered an error\n")
