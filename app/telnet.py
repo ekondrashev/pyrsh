@@ -24,4 +24,3 @@ class telnet(object):
 			tn.write(self.cmd + "\r\n")
 			time.sleep(1)
 			return tn.read_all()
-			# return tn.read_very_eager()
