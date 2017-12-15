@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# before unit test run must run telnet server @run_telnet_server.py@
 import sys, os 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
