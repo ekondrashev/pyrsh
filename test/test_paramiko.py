@@ -65,7 +65,6 @@ class ParamikoTest(unittest.TestCase):
 
     def test_command_pwd(self):
         result = clparamiko(args('pwd'))
-        print(result.run())
         self.assertEqual(result.run(), ('pwd\r\n[OK]\r\nhostname>'))
 
     def test_command_ls(self):
