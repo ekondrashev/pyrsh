@@ -24,10 +24,10 @@ class MyHandler(TelnetHandler):
 
 
 if __name__ == "__main__":
-	try:
-		server = TelnetServer(("localhost", 10023), MyHandler)
-		server.serve_forever()
-		server.close()
-	except KeyboardInterrupt:
-		sys.stderr.write("Exiting telnet server\n")
+    try:
+        server = TelnetServer(("localhost", 10023), MyHandler)
+        server.serve_forever()
+        server.close()
+    except KeyboardInterrupt:
+        sys.stderr.write("Exiting telnet server\n")
         sys.exit(-1)
