@@ -11,12 +11,12 @@ import MockSSH
 import paramiko
 from argparse import Namespace
 
-from app.clparamiko import clparamiko
+from app.clparamiko import ClParamiko
 
 def args(cmd, host='127.0.0.1', user='testadmin', password='x', port=9999):
     return Namespace(host=host, user=user, password=password, cmd=cmd, port=port)
 
-class ParamikoTest(unittest.TestCase):
+class PyrshTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -64,15 +64,16 @@ class ParamikoTest(unittest.TestCase):
         shutil.rmtree(cls.keypath)
 
     def test_command_pwd(self):
-        result = clparamiko(args('pwd'))
+        result = ClParamiko(args('pwd'))
+        print(result.run())
         self.assertEqual(result.run(), ('pwd\r\n[OK]\r\nhostname>'))
 
     def test_command_ls(self):
-        result = clparamiko(args('ls l'))
+        result = ClParamiko(args('ls l'))
         self.assertEqual(result.run(), ('ls l\r\n[OK]\r\nhostname>'))
 
     def test_command_date(self):
-        result = clparamiko(args('date l'))
+        result = ClParamiko(args('date l'))
         self.assertEqual(result.run(), ('date l\r\nMockSSH: Supported usage: date\r\nhostname>'))
 
 if __name__ == "__main__":
