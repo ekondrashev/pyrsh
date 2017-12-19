@@ -1,12 +1,14 @@
 import subprocess
 
-class DefaultSsh(object):
+from args import Arguments
+
+class DefaultSsh(Arguments):
   def __init__(self, args):
-    self.args = args
+    Arguments.__init__(self, args)
 
   def run(self):
-    per = str(self.args.user+'@'+self.args.host)
-    ssh = subprocess.Popen(['ssh', per, self.args.cmd],
+    per = str(self.user+'@'+self.host)
+    ssh = subprocess.Popen(['ssh', per, self.cmd],
                 shell=False,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
