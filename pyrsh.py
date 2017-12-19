@@ -3,10 +3,10 @@
 import argparse
 import sys
 
-from app.clparamiko import clparamiko
-from app.defaultssh import defaultssh
-from app.telnet import telnet
-from app.local import local
+from app.clparamiko import ClParamiko
+from app.defaultssh import DefaultSsh
+from app.telnet import ClTelnet
+from app.local import Local
    
 def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
@@ -22,16 +22,16 @@ def main():
     try:
         args = arguments()
         if(args.type == "local"):
-            runloc = local(args)
+            runloc = Local(args)
             print(runloc.run())
         elif(args.type == "def_li"):
-            conlin = defaultssh(args)
+            conlin = DefaultSsh(args)
             print(conlin.run())
         elif(args.type == "def_win"):
-            conwin = telnet(args)
+            conwin = ClTelnet(args)
             print(conwin.run())
         elif(args.type == "custom"):
-            conpara = clparamiko(args)
+            conpara = ClParamiko(args)
             print(conpara.run())
     except:
         sys.stderr.write("Encountered an error\n")
