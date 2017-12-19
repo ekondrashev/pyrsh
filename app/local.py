@@ -1,8 +1,10 @@
 import subprocess
 
-class Local(object):
+from args import Arguments
+
+class Local(Arguments):
     def __init__(self, args):
-        self.args = args
+        Arguments.__init__(self, args)
 
     def run(self):
-        return subprocess.Popen(self.args.cmd, shell=True)
+        return subprocess.Popen(self.cmd, shell=True)
