@@ -2,15 +2,17 @@ import paramiko
 import time
 from contextlib import contextmanager
 
-class ClParamiko(object):
+from args import Arguments
+
+class ClParamiko(Arguments):
     def __init__(self, args):
-        self.args = args
+        Arguments.__init__(self, args)
 
     @contextmanager
     def connect(self):
         con = paramiko.SSHClient()
         con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        con.connect(hostname=self.args.host, port=self.args.port, username=self.args.user, password=self.args.password)
+        con.connect(hostname=self.host, port=self.port, username=self.user, password=self.password)
         yield con
         con.close()
 
@@ -26,7 +28,7 @@ class ClParamiko(object):
         with self.connect() as connect:
             channel = connect.invoke_shell()
             self.response(channel)
-            channel.send(self.args.cmd+'\n')
+            channel.send(self.cmd+'\n')
             stdout = self.response(channel)
             return stdout
 
