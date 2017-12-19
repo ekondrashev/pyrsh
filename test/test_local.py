@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from argparse import Namespace
 
-from app.local import local
+from app.local import Local
 
 
 def args(cmd):
@@ -14,7 +14,7 @@ def args(cmd):
 
 class LocalTest(unittest.TestCase):
     def test_command_help(self):
-        loc = local(args("help"))
+        loc = Local(args("help"))
         self.assertTrue(loc.run())
         
 if __name__ == "__main__":
