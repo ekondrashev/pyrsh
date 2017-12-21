@@ -10,7 +10,7 @@ from app.local import Local
    
 def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
-    parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; def_li - run a command for Linux without using third-party libraries; def_win - run a command for Linux without using third-party libraries; custom - run a command with using paramiko', type=str)
+    parser.add_argument('type', help='Type remote connection. Value: pyr_local - local execute cmd; pyr_ssh - run a command for Linux without using third-party libraries; pyr_telnet - run a command for Linux without using third-party libraries; pyr_paramiko - run a command with using paramiko', type=str)
     parser.add_argument('cmd', help='Command bash', type=str)
     parser.add_argument('user', help='User name to use for authentication', type=str)
     parser.add_argument('password', help='Password to use for authentication', type=str)
@@ -20,19 +20,15 @@ def arguments():
 
 def main():
     try:
+        dicar = {
+                    'pyr_local': Local,
+                    'pyr_ssh': DefaultSsh,
+                    'pyr_telnet': ClTelnet,
+                    'pyr_paramiko': ClParamiko,
+                }
         args = arguments()
-        if(args.type == "local"):
-            runloc = Local(args)
-            print(runloc.run())
-        elif(args.type == "def_li"):
-            conlin = DefaultSsh(args)
-            print(conlin.run())
-        elif(args.type == "def_win"):
-            conwin = ClTelnet(args)
-            print(conwin.run())
-        elif(args.type == "custom"):
-            conpara = ClParamiko(args)
-            print(conpara.run())
+        cl  = dicar.get(args.type)(args) 
+        print(cl.run())
     except:
         sys.stderr.write("Encountered an error\n")
         sys.exit(-1)
