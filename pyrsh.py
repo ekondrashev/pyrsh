@@ -10,6 +10,7 @@ from app.local import Local
    
 def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
+    parser.add_argument('version', help='Version running scripts', type=float)
     parser.add_argument('type', help='Type remote connection. Value: pyr_local - local execute cmd; pyr_ssh - run a command for Linux without using third-party libraries; pyr_telnet - run a command for Linux without using third-party libraries; pyr_paramiko - run a command with using paramiko', type=str)
     parser.add_argument('cmd', help='Command bash', type=str)
     parser.add_argument('user', help='User name to use for authentication', type=str)
@@ -27,8 +28,9 @@ def main():
                     'pyr_paramiko': ClParamiko,
                 }
         args = arguments()
-        cl  = dicar.get(args.type)(args) 
-        print(cl.run())
+        if(args.version == 0.1):
+            cl  = dicar.get(args.type)(args) 
+            print(cl.run())
     except:
         sys.stderr.write("Encountered an error\n")
         sys.exit(-1)
