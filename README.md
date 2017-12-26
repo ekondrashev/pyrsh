@@ -14,7 +14,7 @@ user - username
 password - password for connect
 host - host server
 port - server port  
-Example - `pyrsh.py 0.1 pyr_ssh pwd user password localhost 22`
+Example - `pyrsh.py pyr_ssh pwd user password localhost 22`
 
 running unittests
 local test - `./test_local.py`
