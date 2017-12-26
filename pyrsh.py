@@ -10,7 +10,7 @@ from app.local import Local
    
 def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
-    parser.add_argument('type', help='Type remote connection. Value: pyr_local - local execute cmd; pyr_ssh - run a command for Linux without using third-party libraries; pyr_telnet - run a command for Linux without using third-party libraries; pyr_paramiko - run a command with using paramiko', type=str)
+    parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; ssh - run a command for Linux without using third-party libraries; telnet - run a command for Linux without using third-party libraries; paramiko - run a command with using paramiko', type=str)
     parser.add_argument('cmd', help='Command bash', type=str)
     parser.add_argument('user', help='User name to use for authentication', type=str)
     parser.add_argument('password', help='Password to use for authentication', type=str)
@@ -21,10 +21,10 @@ def arguments():
 def main():
     try:
         dicar = {
-                    'pyr_local': Local,
-                    'pyr_ssh': DefaultSsh,
-                    'pyr_telnet': ClTelnet,
-                    'pyr_paramiko': ClParamiko,
+                    'local': Local,
+                    'ssh': DefaultSsh,
+                    'telnet': ClTelnet,
+                    'paramiko': ClParamiko,
                 }
         args = arguments()
         cl  = dicar.get(args.type)(args) 
