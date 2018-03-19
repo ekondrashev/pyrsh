@@ -3,8 +3,9 @@ import time
 from contextlib import contextmanager
 
 from args import Arguments
+from shell import Shell
 
-class ClTelnet(Arguments):
+class ClTelnet(Arguments, Shell):
     def __init__(self, args):
         Arguments.__init__(self, args)
 
