@@ -1,8 +1,9 @@
 import subprocess
 
 from args import Arguments
+from shell import Shell
 
-class DefaultSsh(Arguments):
+class DefaultSsh(Arguments, Shell):
     def __init__(self, args):
         Arguments.__init__(self, args)
 
