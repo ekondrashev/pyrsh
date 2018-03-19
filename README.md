@@ -5,10 +5,10 @@ to run in cmd you need to enter
 `pyrsh.py type command user password host port`
 
 type - connection type
-    pyr_local - running cmd on the local machine
-    pyr_ssh - connection via default libraries
-    pyr_telnet - connect to telnet server
-    pyr_paramiko - connection via libraries paramiko
+    local - running cmd on the local machine
+    ssh - connection via default libraries
+    telnet - connect to telnet server
+    paramiko - connection via libraries paramiko
 command - comand for running
 user - username
 password - password for connect
