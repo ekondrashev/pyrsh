@@ -28,7 +28,10 @@ def main():
                 }
         args = arguments()
         cl  = dicar.get(args.type)(args) 
-        print(cl.run())
+        try:
+            print(cl.run())
+        except NotImplementedError, msg:
+            print msg  
     except:
         sys.stderr.write("Encountered an error\n")
         sys.exit(-1)
