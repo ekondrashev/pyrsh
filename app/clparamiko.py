@@ -6,8 +6,8 @@ from args import Arguments
 from shell import Shell
 
 class ClParamiko(Arguments, Shell):
-    def __init__(self, args):
-        Arguments.__init__(self, args)
+    def __init__(self, args, password):
+        Arguments.__init__(self, args, password)
 
     @contextmanager
     def connect(self):
