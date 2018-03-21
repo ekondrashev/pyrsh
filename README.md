@@ -2,7 +2,7 @@
 Remote shell in python
 
 to run in cmd you need to enter
-`pyrsh.py type command user password host port`
+`pyrsh.py type command user host port`
 
 type - connection type
     local - running cmd on the local machine
@@ -11,10 +11,9 @@ type - connection type
     paramiko - connection via libraries paramiko
 command - comand for running
 user - username
-password - password for connect
 host - host server
 port - server port  
-Example - `pyrsh.py pyr_ssh pwd user password localhost 22`
+Example - `pyrsh.py pyr_ssh pwd user localhost 22`
 
 running unittests
 local test - `./test_local.py`
