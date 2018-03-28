@@ -1,18 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import getpass
 import sys
 
 from app.clparamiko import ClParamiko
 from app.defaultssh import DefaultSsh
 from app.telnet import ClTelnet
 from app.local import Local
-   
+
+class Password(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string):
+        setattr(namespace, self.dest, values)
+        setattr(namespace, 'password', getpass.getpass())
+
 def arguments():
     parser = argparse.ArgumentParser(description='Remote command execution via ssh')
     parser.add_argument('type', help='Type remote connection. Value: local - local execute cmd; ssh - run a command for Linux without using third-party libraries; telnet - run a command for Linux without using third-party libraries; paramiko - run a command with using paramiko', type=str)
     parser.add_argument('cmd', help='Command bash', type=str)
-    parser.add_argument('user', help='User name to use for authentication', type=str)
+    parser.add_argument('user', action=Password, help='User name to use for authentication', type=str)
     parser.add_argument('host', nargs='?', default="127.0.0.1", help='Hostname to use for authentication', type=str)
     parser.add_argument('port', nargs='?', default=22, help='Port/ID, default port=22', type=int)
     return parser.parse_args()
@@ -26,8 +33,7 @@ def main():
                     'paramiko': ClParamiko,
                 }
         args = arguments()
-        get_password = raw_input("Enter the Authentication Password")
-        cl  = dicar.get(args.type)(args, get_password) 
+        cl  = dicar.get(args.type)(args) 
         try:
             print(cl.run())
         except NotImplementedError, msg:
