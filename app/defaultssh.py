@@ -4,8 +4,8 @@ from args import Arguments
 from shell import Shell
 
 class DefaultSsh(Arguments, Shell):
-    def __init__(self, args, password):
-        Arguments.__init__(self, args, password)
+    def __init__(self, args):
+        Arguments.__init__(self, args)
 
     def run(self):
         per = str(self.user+'@'+self.host)
