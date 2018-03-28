@@ -13,7 +13,7 @@ command - comand for running
 user - username
 host - host server
 port - server port  
-Example - `pyrsh.py pyr_ssh pwd user localhost 22`
+Example - `pyrsh.py ssh pwd user localhost 22`
 
 running unittests
 local test - `./test_local.py`
