@@ -2,19 +2,17 @@ import paramiko
 import time
 from contextlib import contextmanager
 
-from args import Arguments
 from shell import Shell
 
-class ClParamiko(Shell):
+class Paramiko(Shell):
     def __init__(self, args):
-        self.arg=Arguments(args)
-        self.result = {}
+        Shell.__init__(self, args)
 
     @contextmanager
     def _connect(self):
         con = paramiko.SSHClient()
         con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        con.connect(hostname=self.arg.getHost(), port=self.arg.getPort(), username=self.arg.getUser(), password=self.arg.getPassword())
+        con.connect(hostname=self.host, port=self.port, username=self.user, password=self.password)
         yield con
         con.close()
 
@@ -26,17 +24,15 @@ class ClParamiko(Shell):
             stdout += channel.recv(1024)
         return stdout
 
-    def _send_connect(self):
+    def _send_connect(self, cmd):
         with self._connect() as connect:
             channel = connect.invoke_shell()
             self._response(channel)
-            for cmd in self.arg.getCmd():
-                channel.send(cmd+'\n')
-                self.result[cmd] = self._response(channel)
-            return self.result
+            channel.send(cmd+'\n')
+            return self._response(channel)
 
-    def run(self):
+    def run(self, cmd):
         try:
-            return(self._send_connect())
+            return(self._send_connect(cmd))
         except paramiko.ssh_exception.AuthenticationException as e:
             return(e)
