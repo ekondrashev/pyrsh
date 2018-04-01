@@ -4,9 +4,9 @@ import argparse
 import getpass
 import sys
 
-from app.clparamiko import ClParamiko
-from app.defaultssh import DefaultSsh
-from app.telnet import ClTelnet
+from app.clparamiko import Paramiko
+from app.ssh import Ssh
+from app.telnet import Telnet
 from app.local import Local
 
 class Password(argparse.Action):
@@ -25,17 +25,18 @@ def arguments():
     return parser.parse_args()
 
 def main():
+    dicar = {
+                'local': Local,
+                'ssh': Ssh,
+                'telnet': Telnet,
+                'paramiko': Paramiko,
+            }
+    args = arguments()
     try:
-        dicar = {
-                    'local': Local,
-                    'ssh': DefaultSsh,
-                    'telnet': ClTelnet,
-                    'paramiko': ClParamiko,
-                }
-        args = arguments()
-        cl  = dicar.get(args.type)(args) 
         try:
-            print(cl.run())
+            cl  = dicar.get(args.type)(args)
+            for cmd in args.cmd.split('#'):
+                print(cl.run(cmd))
         except NotImplementedError, msg:
             print msg  
     except:
