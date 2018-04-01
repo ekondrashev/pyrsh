@@ -2,29 +2,24 @@ import telnetlib
 import time
 from contextlib import contextmanager
 
-from args import Arguments
 from shell import Shell
 
-class ClTelnet(Shell):
+class Telnet(Shell):
     def __init__(self, args):
-        self.arg=Arguments(args)
-        self.result = {}
+        Shell.__init__(self, args)
 
     @contextmanager
     def _tn_connect(self):
-        tn = telnetlib.Telnet(self.arg.getHost(), self.arg.getPort())
+        tn = telnetlib.Telnet(self.host, self.port)
         tn.read_until("login: ")
-        tn.write(self.arg.getUser() + "\r\n")
+        tn.write(self.user + "\r\n")
         tn.read_until("password: ")
-        tn.write(self.arg.getPassword() + "\r\n")
+        tn.write(self.password + "\r\n")
         yield tn
         tn.close()
 
-    def run(self):
+    def run(self, cmd):
         with self._tn_connect() as connect: 
-            
-            for cmd in self.arg.getCmd():
-                tn.write(cmd + "\r\n")
-                time.sleep(1)
-                self.result[cmd] = tn.read_all()
-            return self.result  
+            tn.write(cmd + "\r\n")
+            time.sleep(1)
+            return tn.read_all()
