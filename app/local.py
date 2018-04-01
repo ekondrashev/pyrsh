@@ -1,16 +1,11 @@
 import subprocess
 
 from shell import Shell
-from args import Arguments
-
 
 class Local(Shell):
     def __init__(self, args):
-        self.arg=Arguments(args)
-        self.result = {}
+        Shell.__init__(self, args)
 
-    def run(self):
-        for cmd in self.arg.getCmd():
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            self.result[cmd] = p.stdout.read()
-        return self.result
+    def run(self, cmd):
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        return p.stdout.read()
