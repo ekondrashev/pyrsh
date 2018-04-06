@@ -4,7 +4,7 @@ import argparse
 import getpass
 import sys
 
-from app.base import Base
+from app.base import Local, Ssh, Telnet, Paramiko
 
 class Password(argparse.Action):
 
@@ -22,8 +22,14 @@ def arguments():
     return parser.parse_args()
 
 def main():
+    dicar = {
+                'local': Local,
+                'ssh': Ssh,
+                'telnet': Telnet,
+                'paramiko': Paramiko,
+            }
     args = arguments()
-    cl  = Base(args)
+    cl  = dicar.get(args.type)(args) 
     try:
         try:
             for cmd in args.cmd.split('#'):
