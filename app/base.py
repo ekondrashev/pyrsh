@@ -9,8 +9,7 @@ class Base(object):
         self.type = args.type
         self.cmd = args.cmd.split('#')
         self.user = args.user
-        # self.password = args.password
-        self.password = "MndJa1hkPimLDZya"
+        self.password = args.password
         self.host = args.host
         self.port = args.port
 
