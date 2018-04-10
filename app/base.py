@@ -14,14 +14,14 @@ class Base(object):
         self.port = args.port
 
     def _execution(self, per):
-        ssh = subprocess.Popen(per,
+        query = subprocess.Popen(per,
                 shell=False,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
                 )
-        checkerror = ssh.stdout.readlines()
+        checkerror = query.stdout.readlines()
         if checkerror == []:
-            return ssh.stderr.readlines()
+            return query.stderr.readlines()
         else:
             return checkerror
 
