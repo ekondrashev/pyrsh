@@ -4,7 +4,7 @@ import argparse
 import getpass
 import sys
 
-from app.base import Local, Ssh, Telnet, Paramiko
+from shell.base import Local, Ssh, Telnet, Paramiko
 
 class Password(argparse.Action):
 
