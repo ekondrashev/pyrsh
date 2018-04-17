@@ -4,7 +4,7 @@ import argparse
 import getpass
 import sys
 
-from shell.base import Local, Ssh, Telnet, Paramiko
+from shell.base import ExecutionSubproces, Ssh, Telnet, Paramiko
 
 class Password(argparse.Action):
 
@@ -23,7 +23,7 @@ def arguments():
 
 def main():
     dicar = {
-                'local': Local,
+                'local': ExecutionSubproces,
                 'ssh': Ssh,
                 'telnet': Telnet,
                 'paramiko': Paramiko,
