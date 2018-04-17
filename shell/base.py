@@ -4,23 +4,6 @@ import subprocess
 import telnetlib
 
 class Base(object):
-    def run(self, *args, **kwargs):
-        raise NotImplementedError('Abstract method not implemented.')
-
-class ExecutionSubproces(object):
-    def run(self, per):
-        query = subprocess.Popen(per,
-                shell=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-                )
-        checkerror = query.stdout.readlines()
-        if checkerror == []:
-            return query.stderr.readlines()
-        else:
-            return checkerror
-
-class Connection(object):
     def __init__(self, args):
         if(args.type == "paramiko"):
             self.con = paramiko.SSHClient()
@@ -39,10 +22,29 @@ class Connection(object):
     def __exit__(self, type, value, traceback):
         self.con.close()
 
+    def run(self, *args, **kwargs):
+        raise NotImplementedError('Abstract method not implemented.')
+
+class ExecutionSubproces(object):
+    def __init__(self, *args):
+        self.args = args
+
+    def run(self, per):
+        query = subprocess.Popen(per,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+                )
+        checkerror = query.stdout.readlines()
+        if checkerror == []:
+            return query.stderr.readlines()
+        else:
+            return checkerror    
+
 class Paramiko(Base):
     def __init__(self, args):
         self.args = args
-        self.base = Base()
+        self.base = Base(self.args)
 
     def _response(self, channel):
         while not channel.recv_ready():
@@ -53,30 +55,23 @@ class Paramiko(Base):
         return stdout
 
     def _send_connect(self, cmd):
-        with Connection(self.args) as connect:
+        with Base(self.args) as connect:
             channel = connect.invoke_shell()
             self._response(channel)
             channel.send(cmd+'\n')
             return self._response(channel)
 
-    def run(self, cmd):
+    def rusn(self, cmd):
         try:
             return(self._send_connect(cmd))
         except paramiko.ssh_exception.AuthenticationException as e:
             return(e)
 
-class Local(Base):
-    def __init__(self, *args):
-        self.execution = ExecutionSubproces()
-
-    def run(self, cmd):
-        return self.execution.run(cmd)
-
 class Ssh(Base):
     def __init__(self, args):
         self.user = args.user
         self.host = args.host
-        self.base = Base()
+        self.base = Base(args)
         self.execution = ExecutionSubproces()
 
     def run(self, cmd):
@@ -86,10 +81,10 @@ class Ssh(Base):
 class Telnet(Base):
     def __init__(self, args):
         self.args = args
-        self.base = Base()
+        self.base = Base(self.args)
 
     def run(self, cmd):
-        with Connection(self.args) as connect:
+        with Base(self.args) as connect:
             connect.write(cmd + "\r\n")
             time.sleep(1)
             return connect.read_all()
