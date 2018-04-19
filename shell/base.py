@@ -5,9 +5,10 @@ import telnetlib
 
 class Base(object):
     def __init__(self, args):
-        self.con = Connection()._definition_con(args)
+        self.args = args.args
 
     def __enter__(self):
+        self.con = Connection()._definition_con(args)
         return self.con
 
     def __exit__(self, type, value, traceback):
@@ -55,8 +56,7 @@ class ExecutionSubproces(object):
 
 class Paramiko(Base):
     def __init__(self, args):
-        self.args = args
-        self.base = Base(self.args)
+        self.base = Base(args)
 
     def _response(self, channel):
         while not channel.recv_ready():
@@ -81,8 +81,7 @@ class Paramiko(Base):
 
 class Ssh(Base):
     def __init__(self, args):
-        self.args = args.args
-        self.base = Base(self.args)
+        self.base = Base(args)
         self.execution = ExecutionSubproces()
 
     def run(self, cmd):
@@ -91,11 +90,10 @@ class Ssh(Base):
 
 class Telnet(Base):
     def __init__(self, args):
-        self.args = args
-        self.base = Base(self.args)
+        self.base = Base(args)
 
     def run(self, cmd):
-        with Base(self.args) as connect:
+        with self.base as connect:
             connect.write(cmd + "\r\n")
             time.sleep(1)
             return connect.read_all()
