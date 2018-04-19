@@ -8,7 +8,7 @@ class Base(object):
         self.args = args.args
 
     def __enter__(self):
-        self.con = Connection()._definition_con(args)
+        self.con = Connection()._definition_con(self.args)
         return self.con
 
     def __exit__(self, type, value, traceback):
