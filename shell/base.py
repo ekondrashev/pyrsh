@@ -5,7 +5,7 @@ import telnetlib
 
 class Base(object):
     def __init__(self, args):
-        self.args = args.args
+        self.args = args
 
     def __enter__(self):
         self.con = Connection()._definition_con(self.args)
@@ -20,23 +20,9 @@ class Base(object):
 class Connection(object):    
     def _definition_con(self, args):
         if(args.type == "paramiko"):
-            return self._type_paramiko(args)
+            return Paramiko(args)._type_paramiko()
         elif(args.type == "telnet"):
-            return self._type_telnet(args)
-
-    def _type_paramiko(self, args):
-            self.con = paramiko.SSHClient()
-            self.con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.con.connect(hostname=args.host, port=args.port, username=args.user, password=args.password)
-            return self.con
-
-    def _type_telnet(self, args):
-            self.con = telnetlib.Telnet(args.host, args.port)
-            self.con.read_until("login: ")
-            self.con.write(args.user + "\r\n")
-            self.con.read_until("password: ")
-            self.con.write(args.password + "\r\n")
-            return self.con
+            return Telnet(args)._type_telnet()
 
 class ExecutionSubproces(object):
     def __init__(self, *args):
@@ -56,7 +42,13 @@ class ExecutionSubproces(object):
 
 class Paramiko(Base):
     def __init__(self, args):
-        self.base = Base(args)
+        Base.__init__(self, args)
+
+    def _type_paramiko(self):
+            self.con = paramiko.SSHClient()
+            self.con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.con.connect(hostname=self.args.host, port=self.args.port, username=self.args.user, password=self.args.password)
+            return self.con
 
     def _response(self, channel):
         while not channel.recv_ready():
@@ -67,7 +59,7 @@ class Paramiko(Base):
         return stdout
 
     def _send_connect(self, cmd):
-        with self.base as connect:
+        with Base(self.args) as connect:
             channel = connect.invoke_shell()
             self._response(channel)
             channel.send(cmd+'\n')
@@ -81,7 +73,7 @@ class Paramiko(Base):
 
 class Ssh(Base):
     def __init__(self, args):
-        self.base = Base(args)
+        Base.__init__(self, args)
         self.execution = ExecutionSubproces()
 
     def run(self, cmd):
@@ -90,10 +82,18 @@ class Ssh(Base):
 
 class Telnet(Base):
     def __init__(self, args):
-        self.base = Base(args)
+        Base.__init__(self, args)
+
+    def _type_telnet(self):
+        self.con = telnetlib.Telnet(self.args.host, self.args.port)
+        self.con.read_until("login: ")
+        self.con.write(self.args.user + "\r\n")
+        self.con.read_until("password: ")
+        self.con.write(self.args.password + "\r\n")
+        return self.con
 
     def run(self, cmd):
-        with self.base as connect:
+        with Base(self.args) as connect:
             connect.write(cmd + "\r\n")
             time.sleep(1)
             return connect.read_all()
