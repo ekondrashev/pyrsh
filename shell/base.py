@@ -20,9 +20,9 @@ class Base(object):
 class Connection(object):    
     def _definition_con(self, args):
         if(args.type == "paramiko"):
-            return Paramiko(args)._type_paramiko()
+            return Paramiko(args)._connect_paramiko()
         elif(args.type == "telnet"):
-            return Telnet(args)._type_telnet()
+            return Telnet(args)._connect_telnet()
 
 class ExecutionSubproces(object):
     def __init__(self, *args):
@@ -44,7 +44,7 @@ class Paramiko(Base):
     def __init__(self, args):
         Base.__init__(self, args)
 
-    def _type_paramiko(self):
+    def _connect_paramiko(self):
             self.con = paramiko.SSHClient()
             self.con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.con.connect(hostname=self.args.host, port=self.args.port, username=self.args.user, password=self.args.password)
@@ -84,7 +84,7 @@ class Telnet(Base):
     def __init__(self, args):
         Base.__init__(self, args)
 
-    def _type_telnet(self):
+    def _connect_telnet(self):
         self.con = telnetlib.Telnet(self.args.host, self.args.port)
         self.con.read_until("login: ")
         self.con.write(self.args.user + "\r\n")
