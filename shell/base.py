@@ -8,37 +8,20 @@ class Base(object):
         self.args = args
 
     def __enter__(self):
-        self.con = Connection()._definition_con(self.args)
+        self.con = self._definition_con()
         return self.con
 
     def __exit__(self, type, value, traceback):
         self.con.close()
 
+    def _definition_con(self):
+        if(self.args.type == "paramiko"):
+            return Paramiko(self.args)._connect_paramiko()
+        elif(self.args.type == "telnet"):
+            return Telnet(self.args)._connect_telnet()
+
     def run(self, *args, **kwargs):
         raise NotImplementedError('Abstract method not implemented.')
-
-class Connection(object):    
-    def _definition_con(self, args):
-        if(args.type == "paramiko"):
-            return Paramiko(args)._connect_paramiko()
-        elif(args.type == "telnet"):
-            return Telnet(args)._connect_telnet()
-
-class ExecutionSubproces(object):
-    def __init__(self, *args):
-        self.args = args
-
-    def run(self, per):
-        query = subprocess.Popen(per,
-                shell=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-                )
-        checkerror = query.stdout.readlines()
-        if checkerror == []:
-            return query.stderr.readlines()
-        else:
-            return checkerror    
 
 class Paramiko(Base):
     def __init__(self, args):
@@ -71,14 +54,29 @@ class Paramiko(Base):
         except paramiko.ssh_exception.AuthenticationException as e:
             return(e)
 
+class Local(object):
+    def __init__(self, args):
+        Base.__init__(self, args)
+
+    def run(self, cmd):
+        query = subprocess.Popen(cmd,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+                )
+        checkerror = query.stdout.readlines()
+        if checkerror == []:
+            return query.stderr.readlines()
+        else:
+            return checkerror 
+
 class Ssh(Base):
     def __init__(self, args):
         Base.__init__(self, args)
-        self.execution = ExecutionSubproces()
 
     def run(self, cmd):
         per = str(self.args.user+'@'+self.args.host)
-        return self.execution.run(['ssh', per, cmd])
+        return Local(self.args).run(['ssh', per, cmd])
 
 class Telnet(Base):
     def __init__(self, args):
