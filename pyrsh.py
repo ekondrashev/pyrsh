@@ -32,8 +32,13 @@ def main():
     cl  = dicar.get(args.type)(args) 
     try:
         try:
-            for cmd in args.cmd.split('#'):
-                print(cl.run(cmd))
+            if str(args.type) == "paramiko" or str(args.type) == "telnet":
+                with cl as connect:
+                    for cmd in args.cmd.split('#'):
+                        print(cl.run(connect, cmd))
+            else:
+                for cmd in args.cmd.split('#'):
+                    print(cl.run(cmd))
         except NotImplementedError, msg:
             print msg  
     except:
