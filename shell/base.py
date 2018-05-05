@@ -8,26 +8,23 @@ class Base(object):
         self.args = args
 
     def __enter__(self):
-        self.con = self._definition_con()
+        self.con = self._connect()
         return self.con
 
     def __exit__(self, type, value, traceback):
-        self.con.close()
-
-    def _definition_con(self):
-        if(self.args.type == "paramiko"):
-            return Paramiko(self.args)._connect_paramiko()
-        elif(self.args.type == "telnet"):
-            return Telnet(self.args)._connect_telnet()
+        self.con.close()       
 
     def run(self, *args, **kwargs):
-        raise NotImplementedError('Abstract method not implemented.')
+        raise NotImplementedError('Methodethod not implemented.')
+
+    def _connect(self, **kwargs):
+        raise NotImplementedError('Method not implemented..')
 
 class Paramiko(Base):
     def __init__(self, args):
         Base.__init__(self, args)
 
-    def _connect_paramiko(self):
+    def _connect(self):
             self.con = paramiko.SSHClient()
             self.con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.con.connect(hostname=self.args.host, port=self.args.port, username=self.args.user, password=self.args.password)
@@ -41,20 +38,13 @@ class Paramiko(Base):
             stdout += channel.recv(1024)
         return stdout
 
-    def _send_connect(self, cmd):
-        with Base(self.args) as connect:
-            channel = connect.invoke_shell()
-            self._response(channel)
-            channel.send(cmd+'\n')
-            return self._response(channel)
+    def run(self, connect, cmd):
+        channel = connect.invoke_shell()
+        self._response(channel)
+        channel.send(cmd+'\n')
+        return self._response(channel)
 
-    def run(self, cmd):
-        try:
-            return(self._send_connect(cmd))
-        except paramiko.ssh_exception.AuthenticationException as e:
-            return(e)
-
-class Local(object):
+class Local(Base):
     def __init__(self, args):
         Base.__init__(self, args)
 
@@ -82,7 +72,7 @@ class Telnet(Base):
     def __init__(self, args):
         Base.__init__(self, args)
 
-    def _connect_telnet(self):
+    def _connect(self):
         self.con = telnetlib.Telnet(self.args.host, self.args.port)
         self.con.read_until("login: ")
         self.con.write(self.args.user + "\r\n")
@@ -90,8 +80,7 @@ class Telnet(Base):
         self.con.write(self.args.password + "\r\n")
         return self.con
 
-    def run(self, cmd):
-        with Base(self.args) as connect:
-            connect.write(cmd + "\r\n")
-            time.sleep(1)
-            return connect.read_all()
+    def run(self, connect, cmd):
+        connect.write(cmd + "\r\n")
+        time.sleep(1)
+        return connect.read_all()
