@@ -47,8 +47,14 @@ class Paramiko(Base):
 class Local(Base):
     def __init__(self, args):
         Base.__init__(self, args)
+    
+    def __enter__(self):
+        return
 
-    def run(self, cmd):
+    def __exit__(self, type, value, traceback):   
+        return
+
+    def run(self, connect, cmd):
         query = subprocess.Popen(cmd,
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -63,8 +69,14 @@ class Local(Base):
 class Ssh(Base):
     def __init__(self, args):
         Base.__init__(self, args)
+    
+    def __enter__(self):
+        return
 
-    def run(self, cmd):
+    def __exit__(self, type, value, traceback):   
+        return
+
+    def run(self, connect, cmd):
         per = str(self.args.user+'@'+self.args.host)
         return Local(self.args).run(['ssh', per, cmd])
 
