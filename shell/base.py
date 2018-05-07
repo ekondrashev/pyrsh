@@ -4,15 +4,11 @@ import subprocess
 import telnetlib
 
 class Base(object):
-    def __init__(self, args):
-        self.args = args
-
     def __enter__(self):
-        self.con = self._connect()
-        return self.con
+        return
 
     def __exit__(self, type, value, traceback):
-        self.con.close()       
+        return
 
     def run(self, *args, **kwargs):
         raise NotImplementedError('Methodethod not implemented.')
@@ -22,7 +18,14 @@ class Base(object):
 
 class Paramiko(Base):
     def __init__(self, args):
-        Base.__init__(self, args)
+        self.args = args
+    
+    def __enter__(self):
+        self.con = self._connect()
+        return self.con
+
+    def __exit__(self, type, value, traceback):
+        self.con.close()       
 
     def _connect(self):
             self.con = paramiko.SSHClient()
@@ -38,23 +41,17 @@ class Paramiko(Base):
             stdout += channel.recv(1024)
         return stdout
 
-    def run(self, connect, cmd):
-        channel = connect.invoke_shell()
+    def run(self, shell, cmd):
+        channel = shell.invoke_shell()
         self._response(channel)
         channel.send(cmd+'\n')
         return self._response(channel)
 
 class Local(Base):
     def __init__(self, args):
-        Base.__init__(self, args)
-    
-    def __enter__(self):
-        return
+        self.args = args
 
-    def __exit__(self, type, value, traceback):   
-        return
-
-    def run(self, connect, cmd):
+    def run(self, shell, cmd):
         query = subprocess.Popen(cmd,
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -68,21 +65,23 @@ class Local(Base):
 
 class Ssh(Base):
     def __init__(self, args):
-        Base.__init__(self, args)
-    
-    def __enter__(self):
-        return
+        self.args = args
+        self.local = Local(self.args)
 
-    def __exit__(self, type, value, traceback):   
-        return
-
-    def run(self, connect, cmd):
+    def run(self, shell, cmd):
         per = str(self.args.user+'@'+self.args.host)
-        return Local(self.args).run(['ssh', per, cmd])
+        return self.local.run(['ssh', per, cmd])
 
 class Telnet(Base):
     def __init__(self, args):
-        Base.__init__(self, args)
+        self.args = args
+
+    def __enter__(self):
+        self.con = self._connect()
+        return self.con
+
+    def __exit__(self, type, value, traceback):
+        self.con.close()       
 
     def _connect(self):
         self.con = telnetlib.Telnet(self.args.host, self.args.port)
@@ -92,7 +91,7 @@ class Telnet(Base):
         self.con.write(self.args.password + "\r\n")
         return self.con
 
-    def run(self, connect, cmd):
-        connect.write(cmd + "\r\n")
+    def run(self, shell, cmd):
+        shell.write(cmd + "\r\n")
         time.sleep(1)
-        return connect.read_all()
+        return shell.read_all()
