@@ -22,19 +22,19 @@ def arguments():
     return parser.parse_args()
 
 def main():
-    dicar = {
+    type_connect = {
                 'local': Local,
                 'ssh': Ssh,
                 'telnet': Telnet,
                 'paramiko': Paramiko,
             }
     args = arguments()
-    cl  = dicar.get(args.type)(args) 
+    cl  = type_connect.get(args.type)(args) 
     try:
         try:
-            with cl as connect:
+            with cl as shell:
                 for cmd in args.cmd.split('#'):
-                    print(cl.run(connect, cmd))
+                    print(cl.run(shell, cmd))
         except NotImplementedError, msg:
             print msg  
     except:
