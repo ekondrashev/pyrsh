@@ -7,7 +7,6 @@ import sys
 from shell.base import Local, Ssh, Telnet, Paramiko
 
 class Password(argparse.Action):
-
     def __call__(self, parser, namespace, values, option_string):
         setattr(namespace, self.dest, values)
         setattr(namespace, 'password', getpass.getpass())
