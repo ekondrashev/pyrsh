@@ -29,12 +29,11 @@ def main():
                 'paramiko': Paramiko,
             }
     args = arguments()
-    cl  = type_connect.get(args.type)(args) 
     try:
         try:
-            with cl as shell:
+            with type_connect.get(args.type)(args) as base:
                 for cmd in args.cmd.split('#'):
-                    print(cl.run(shell, cmd))
+                    print(base.run(cmd))
         except NotImplementedError, msg:
             print msg  
     except:
