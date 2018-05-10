@@ -30,9 +30,9 @@ def main():
     args = arguments()
     try:
         try:
-            with type_connect.get(args.type)(args) as base:
+            with type_connect.get(args.type)(args) as shell:
                 for cmd in args.cmd.split('#'):
-                    print(base.run(cmd))
+                    print(shell.run(cmd))
         except NotImplementedError, msg:
             print msg  
     except:
