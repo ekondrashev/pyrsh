@@ -8,7 +8,7 @@ class Base(object):
         self.args = args
 
     def __enter__(self):
-        return
+        return self
 
     def __exit__(self, type, value, traceback):
         return
@@ -41,9 +41,6 @@ class Paramiko(Base):
         return self._response(channel)
 
 class Local(Base):
-    def __enter__(self):
-        return self
-
     def run(self, cmd):
         query = subprocess.Popen(cmd,
                 shell=False,
@@ -57,8 +54,12 @@ class Local(Base):
             return checkerror 
 
 class Ssh(Base):
-    def __enter__(self):
+    def init__(args):
+        Base.__init__(self, args)
         self.local = Local(self.args)
+        
+    def enter__(self):
+        self.local.__enter__()
         return self
 
     def run(self, cmd):
