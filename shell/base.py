@@ -8,16 +8,13 @@ class Base(object):
         self.args = args
 
     def __enter__(self):
-        return self
+        return
 
     def __exit__(self, type, value, traceback):
         return
 
     def run(self, *args, **kwargs):
         raise NotImplementedError('Methodethod not implemented.')
-
-    def _connect(self, **kwargs):
-        raise NotImplementedError('Method not implemented..')
 
 class Paramiko(Base):    
     def __enter__(self):
@@ -44,6 +41,9 @@ class Paramiko(Base):
         return self._response(channel)
 
 class Local(Base):
+    def __enter__(self):
+        return self
+
     def run(self, cmd):
         query = subprocess.Popen(cmd,
                 shell=False,
