@@ -58,9 +58,12 @@ class Ssh(Base):
         Base.__init__(self, args)
         self.local = Local(self.args)
         
-    def enter__(self):
+    def __enter__(self):
         self.local.__enter__()
         return self
+    
+    def __exit__(self):
+        return self.local.__exit__()
 
     def run(self, cmd):
         per = str(self.args.user+'@'+self.args.host)
