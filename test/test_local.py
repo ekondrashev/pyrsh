@@ -3,19 +3,30 @@
 import sys, os 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+
 import unittest
 from argparse import Namespace
 
-from app.local import Local
+from shell.base import Local
 
 
-def args(cmd):
-    return Namespace(cmd=cmd)
 
 class LocalTest(unittest.TestCase):
-    def test_command_help(self):
-        loc = Local(args("help"))
-        self.assertTrue(loc.run())
+
+    def setUp(self):
+        self.shell = Local(Namespace(cmd="cmd"))
+        self.shell = self.shell.__enter__()
+
+    def tearDown(self):
+        self.shell.__exit__(self, 'var1', 'var1',)
+        self.assertTrue(1)
+
+    def test_command_pwd(self):
+        print(self.shell.run("pwd"))
+
+    def test_command_ls(self):
+        print(self.shell.run("ls"))
+
         
 if __name__ == "__main__":
     unittest.main()
