@@ -11,7 +11,7 @@ import MockSSH
 import paramiko
 from argparse import Namespace
 
-from app.clparamiko import ClParamiko
+from shell.base import Paramiko
 
 def args(cmd, host='127.0.0.1', user='testadmin', password='x', port=9999):
     return Namespace(host=host, user=user, password=password, cmd=cmd, port=port)
@@ -62,19 +62,26 @@ class PyrshTest(unittest.TestCase):
     def tearDownClass(cls):
         MockSSH.stopThreadedServer()
         shutil.rmtree(cls.keypath)
+    
+    def setUp(self):
+        self.shell = Paramiko(args("cmd"))
+        self.shell = self.shell.__enter__()
+
+    def tearDown(self):
+        self.shell.__exit__(self, 'var1', 'var1',)
+        self.assertTrue(1)
 
     def test_command_pwd(self):
-        result = ClParamiko(args('pwd'))
-        print(result.run())
-        self.assertEqual(result.run(), ('pwd\r\n[OK]\r\nhostname>'))
+        print(self.shell.run("pwd"))
+        self.assertEqual(self.shell.run("pwd"), ('pwd\r\n[OK]\r\nhostname>'))
 
     def test_command_ls(self):
-        result = ClParamiko(args('ls l'))
-        self.assertEqual(result.run(), ('ls l\r\n[OK]\r\nhostname>'))
+        print(self.shell.run("ls l"))
+        self.assertEqual(self.shell.run("ls l"), ('ls l\r\n[OK]\r\nhostname>'))
 
     def test_command_date(self):
-        result = ClParamiko(args('date l'))
-        self.assertEqual(result.run(), ('date l\r\nMockSSH: Supported usage: date\r\nhostname>'))
+        print(self.shell.run("date l"))
+        self.assertEqual(self.shell.run("date l"), ('date l\r\nMockSSH: Supported usage: date\r\nhostname>'))
 
 if __name__ == "__main__":
     unittest.main()
