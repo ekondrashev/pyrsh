@@ -54,16 +54,17 @@ class Local(Base):
             return checkerror 
 
 class Ssh(Base):
-    def init__(args):
-        Base.__init__(self, args)
-        self.local = Local(self.args)
+    def __init__(self, args):
+        super(Ssh, self).__init__(args)
+        self.local = Local(args)
         
     def __enter__(self):
         self.local.__enter__()
         return self
-    
-    def __exit__(self):
-        return self.local.__exit__()
+
+    def __exit__(self, type, value, traceback):
+        self.local.__exit__(self, type, value)
+
 
     def run(self, cmd):
         per = str(self.args.user+'@'+self.args.host)
